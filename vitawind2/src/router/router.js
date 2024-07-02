@@ -12,10 +12,15 @@ const routes = [
     component: () => import('../views/User.vue')
   },
   {
+    path: '/snake',
+    name: 'Snake',
+    component: () => import('../views/Snake.vue')
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')
-  }
+  },
 ]
 const router = createRouter({
   history: createWebHistory(),

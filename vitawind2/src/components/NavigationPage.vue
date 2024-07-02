@@ -16,7 +16,7 @@
         class="relative text-gray-500 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-gray-500 after:transition-transform after:duration-300 after:ease-in-out hover:text-black hover:after:origin-bottom-left hover:after:scale-x-100"
         v-for="child in ChangePage.page"
       >
-        <RouterLink to="/user">
+        <RouterLink :to="child">
           {{ child }}
         </RouterLink>
       </div>
@@ -44,8 +44,8 @@ const ArrData2 = ref({
       page: ['User', 'Skill', 'Education']
     },
     {
-      name: 'context setting',
-      page: [0, 1, '222', 3, 4, 5]
+      name: 'Game',
+      page: ['Snake']
     },
     {
       name: 'muisc setting',

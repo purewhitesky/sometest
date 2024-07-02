@@ -64,12 +64,6 @@
     />
     <NavigationPage class="absolute bottom-0 left-0 right-0 top-16 z-50"></NavigationPage>
   </div>
-  <div
-    v-show="loginState"
-    class="absolute bottom-0 left-0 right-0 top-0 z-50 bg-white/30 backdrop-blur-md"
-  >
-    <NavigationPage class="absolute bottom-0 left-0 right-0 top-16 z-50"></NavigationPage>
-  </div>
 </template>
 <script setup>
 import { ref } from 'vue'
@@ -80,8 +74,6 @@ import { useState } from '@/store/state'
 import { storeToRefs } from 'pinia'
 
 const { inputState } = storeToRefs(useState())
-
-console.log(inputState.value)
 
 const buttonState = ref(false)
 </script>
