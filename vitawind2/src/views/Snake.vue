@@ -1,18 +1,21 @@
 <template>
   <Layouts>
-    <div class="mt-5 flex flex-col items-center justify-center">
+    <div class="mt-5 flex flex-col items-center justify-center gap-5">
       <diV class="flex">
         <div v-for="y in Gamebg">
           <div v-for="x in y">
             <div v-show="x !== 'wall'" class="h-5 w-5 border-[1px] border-black">
-              <div v-show="x === 2" class="h-full w-full bg-black"></div>
+              <div v-show="x === 2" class="h-full w-full bg-slate-700"></div>
+              <div v-show="x === 4" class="h-full w-full bg-black"></div>
               <div v-show="x === 3" class="h-full w-full bg-red-500"></div>
             </div>
           </div>
         </div>
       </diV>
-      <div>{{ GameOver }}</div>
+      <div class="font-bold text-red-600">{{ GameOver }}</div>
       <div>Sorce:{{ playerCount }}</div>
+      <div>Speed:{{ speed }}</div>
+      <button @click="Start" class="rounded-xl bg-white p-2">Start Game</button>
     </div>
   </Layouts>
 </template>
@@ -23,7 +26,25 @@ const Space = ref({ X: 10, Y: 10 })
 const GamebgSetting = ref({ Y: Space.value.Y + 2, X: Space.value.X + 2 })
 const Gamebg = ref([[]])
 const GameX = ref([])
+
 onMounted(() => {
+  Start()
+  window.addEventListener('keydown', handleKeyDown) //啟動監聽
+})
+
+const Start = () => {
+  //初始化
+  playerlocation.value = { x: 1, y: 1 }
+  playerCleanArr.value = []
+  playerCount.value = 0
+  directionX.value = 1
+  directionY.value = 0
+  speed.value = 500
+  keyboard.value = ''
+  GameOver.value = ''
+  cleanCount.value = 0
+
+  //生成場地
   for (let y = 0; y < GamebgSetting.value.Y; y++) {
     for (let x = 0; x < GamebgSetting.value.X; x++) {
       if (y === 0) {
@@ -41,23 +62,21 @@ onMounted(() => {
     Gamebg.value[y] = GameX.value
     GameX.value = []
   }
+  //生成食物位置
   randomFn(playerlocation.value.x, playerlocation.value.y)
-  console.log()
   GameStart()
-  window.addEventListener('keydown', handleKeyDown) //啟動監聽
-})
+}
 
-const playerlocation = ref({ x: 1, y: 1 })
-const playerArr = ref([])
+const playerlocation = ref()
+const playerCleanArr = ref([])
 const playerCount = ref(0)
 const directionX = ref(1)
 const directionY = ref(0)
-const speed = ref(1000)
+const speed = ref(10)
 let interval
 
 const GameStart = () => {
-  console.log(foodRandom.value)
-  Gamebg.value[playerlocation.value.x][playerlocation.value.y] = 2
+  Gamebg.value[playerlocation.value.x][playerlocation.value.y] = 4
   interval = setInterval(() => {
     if (
       foodRandom.value.x === playerlocation.value.x &&
@@ -69,56 +88,61 @@ const GameStart = () => {
 
     changeDirection(keyboard.value)
 
-    playerArr.value.push({ x: playerlocation.value.x, y: playerlocation.value.y })
+    playerCleanArr.value.push({ x: playerlocation.value.x, y: playerlocation.value.y })
     if (playerCount.value === cleanCount.value) {
-      cleanBg(playerArr.value[0].x, playerArr.value[0].y)
-      playerArr.value.shift()
+      cleanBg(playerCleanArr.value[0].x, playerCleanArr.value[0].y)
+      playerCleanArr.value.shift()
     } else {
       cleanCount.value++
     }
     playerlocation.value.x += directionX.value
     playerlocation.value.y += directionY.value
 
-    GameEnd()
+    GameEnd(playerlocation.value, playerCleanArr.value)
 
-    Gamebg.value[playerlocation.value.x][playerlocation.value.y] = 2
-  }, speed.value)
+    Gamebg.value[playerlocation.value.x][playerlocation.value.y] = 4
+    if (playerCount.value > 0) {
+      playerCleanArr.value.forEach((element) => {
+        Gamebg.value[element.x][element.y] = 2
+      })
+    }
+
+    // playerArr.value = [
+    //   { x: playerlocation.value.x, y: playerlocation.value.y },
+    //   ...playerCleanArr.value
+    // ]
+    // console.log(playerArr.value[playerCount.value])
+  }, 1000)
 }
 
 const GameOver = ref()
-const GameEnd = () => {
-  if (playerlocation.value.x < 1) {
-    GameOver.value = 'GameOver'
-    clearInterval(interval)
-  }
-  if (playerlocation.value.x > GamebgSetting.value.X - 2) {
-    GameOver.value = 'GameOver'
-    clearInterval(interval)
-  }
-  if (playerlocation.value.y < 1) {
-    GameOver.value = 'GameOver'
-    clearInterval(interval)
-  }
-  if (playerlocation.value.y > GamebgSetting.value.Y - 2) {
-    GameOver.value = 'GameOver'
-    clearInterval(interval)
-  }
+const GameEnd = (player, playerCleanArr) => {
+  playerCleanArr.forEach((element) => {
+    if (element.x === player.x && element.y === player.y) {
+      GameOver.value = 'GameOver'
+      clearInterval(interval)
+    }
+  })
   if (playerlocation.value.x < 1) {
     playerlocation.value.x = 1
+    GameOver.value = 'GameOver'
+    clearInterval(interval)
   }
   if (playerlocation.value.x > GamebgSetting.value.X - 2) {
     playerlocation.value.x = GamebgSetting.value.X - 2
+    GameOver.value = 'GameOver'
+    clearInterval(interval)
   }
   if (playerlocation.value.y < 1) {
     playerlocation.value.y = 1
+    GameOver.value = 'GameOver'
+    clearInterval(interval)
   }
   if (playerlocation.value.y > GamebgSetting.value.Y - 2) {
     playerlocation.value.y = GamebgSetting.value.Y - 2
+    GameOver.value = 'GameOver'
+    clearInterval(interval)
   }
-
-  playerArr.value.map((e) => {
-    console.log(e)
-  })
 }
 
 //監測鍵盤
@@ -160,7 +184,6 @@ const randomFn = (fristX, fristY) => {
   foodRandom.value.x = X
   foodRandom.value.y = Y
   Gamebg.value[foodRandom.value.x][foodRandom.value.y] = 3
-  console.log(foodRandom.value.x, foodRandom.value.y)
 }
 const cleanCount = ref(0)
 const cleanBg = (x, y) => {
