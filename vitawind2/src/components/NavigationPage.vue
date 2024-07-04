@@ -45,7 +45,7 @@ const ArrData2 = ref({
     },
     {
       name: 'Game',
-      page: ['Snake']
+      page: ['Snake', 'TicTacToe']
     },
     {
       name: 'muisc setting',
