@@ -1,6 +1,6 @@
 <template>
   <Layouts>
-    <div class="mt-5 flex flex-col items-center justify-center gap-5">
+    <div class="mt-5 flex flex-1 flex-col items-center justify-center gap-5">
       <diV class="flex">
         <div v-for="y in Gamebg">
           <div v-for="x in y">
@@ -31,6 +31,14 @@ onMounted(() => {
   Start()
   window.addEventListener('keydown', handleKeyDown) //啟動監聽
 })
+
+const playerlocation = ref()
+const playerCleanArr = ref([])
+const playerCount = ref(0)
+const directionX = ref(1)
+const directionY = ref(0)
+const speed = ref(10)
+const interval = ref()
 
 const Start = () => {
   //初始化
@@ -67,27 +75,22 @@ const Start = () => {
   GameStart()
 }
 
-const playerlocation = ref()
-const playerCleanArr = ref([])
-const playerCount = ref(0)
-const directionX = ref(1)
-const directionY = ref(0)
-const speed = ref(10)
-let interval
-
 const GameStart = () => {
+  //蛇頭
   Gamebg.value[playerlocation.value.x][playerlocation.value.y] = 4
-  interval = setInterval(() => {
+  interval.value = setInterval(() => {
+    //產生新食物
     if (
       foodRandom.value.x === playerlocation.value.x &&
       foodRandom.value.y === playerlocation.value.y
     ) {
       randomFn()
       playerCount.value++
+      speed.value -= 400
     }
-
+    //方向改變
     changeDirection(keyboard.value)
-
+    //清除舊的上色
     playerCleanArr.value.push({ x: playerlocation.value.x, y: playerlocation.value.y })
     if (playerCount.value === cleanCount.value) {
       cleanBg(playerCleanArr.value[0].x, playerCleanArr.value[0].y)
@@ -95,53 +98,50 @@ const GameStart = () => {
     } else {
       cleanCount.value++
     }
+    //前進方向
     playerlocation.value.x += directionX.value
     playerlocation.value.y += directionY.value
-
+    //判斷遊戲結束
     GameEnd(playerlocation.value, playerCleanArr.value)
-
+    //蛇頭
     Gamebg.value[playerlocation.value.x][playerlocation.value.y] = 4
+    //蛇身上色
     if (playerCount.value > 0) {
       playerCleanArr.value.forEach((element) => {
         Gamebg.value[element.x][element.y] = 2
       })
     }
-
-    // playerArr.value = [
-    //   { x: playerlocation.value.x, y: playerlocation.value.y },
-    //   ...playerCleanArr.value
-    // ]
-    // console.log(playerArr.value[playerCount.value])
-  }, 1000)
+  }, speed.value)
 }
 
+//遊戲結束判斷
 const GameOver = ref()
 const GameEnd = (player, playerCleanArr) => {
   playerCleanArr.forEach((element) => {
     if (element.x === player.x && element.y === player.y) {
       GameOver.value = 'GameOver'
-      clearInterval(interval)
+      clearInterval(interval.value)
     }
   })
   if (playerlocation.value.x < 1) {
     playerlocation.value.x = 1
     GameOver.value = 'GameOver'
-    clearInterval(interval)
+    clearInterval(interval.value)
   }
   if (playerlocation.value.x > GamebgSetting.value.X - 2) {
     playerlocation.value.x = GamebgSetting.value.X - 2
     GameOver.value = 'GameOver'
-    clearInterval(interval)
+    clearInterval(interval.value)
   }
   if (playerlocation.value.y < 1) {
     playerlocation.value.y = 1
     GameOver.value = 'GameOver'
-    clearInterval(interval)
+    clearInterval(interval.value)
   }
   if (playerlocation.value.y > GamebgSetting.value.Y - 2) {
     playerlocation.value.y = GamebgSetting.value.Y - 2
     GameOver.value = 'GameOver'
-    clearInterval(interval)
+    clearInterval(interval.value)
   }
 }
 
@@ -157,12 +157,10 @@ const changeDirection = (keyboard) => {
       directionX.value = -1
       directionY.value = 0
       break
-
     case 'd':
       directionX.value = 1
       directionY.value = 0
       break
-
     case 's':
       directionX.value = 0
       directionY.value = 1
@@ -171,7 +169,6 @@ const changeDirection = (keyboard) => {
       directionX.value = 0
       directionY.value = -1
       break
-
     default:
       break
   }
